@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Refit;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -16,6 +17,18 @@ namespace HttpSamples
 
         [JsonProperty("last_name")]
         public string LastName { get; set; }
+    }
+
+    public class UserData
+    {
+        [JsonProperty("data")]
+        public User User { get; set; }
+    }
+
+    public interface IUsersService
+    {
+        [Get("/users/2")]
+        Task<UserData> GetUserById(int userId);
     }
 
     class Program
@@ -44,6 +57,8 @@ namespace HttpSamples
                     }
                 }
             }
+
+            User user2 = (await RestService.For<IUsersService>("https://reqres.in/api").GetUserById(2)).User;
         }
     }
 }
