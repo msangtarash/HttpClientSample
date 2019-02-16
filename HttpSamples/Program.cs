@@ -20,6 +20,21 @@ namespace HttpSamples
         public string LastName { get; set; }
     }
 
+    public class Person
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("job")]
+        public string Job { get; set; }
+
+        [JsonProperty("createdAt")]
+        public string CreatedAt { get; set; }
+    }
+
     public class UserData
     {
         [JsonProperty("data")]
@@ -33,6 +48,9 @@ namespace HttpSamples
 
         [Post("/users")]
         Task<object> CreateUser(object user);
+
+        [Post("/users")]
+        Task<Person> CreateUserByClass(Person user);
     }
 
     class Program
@@ -44,8 +62,8 @@ namespace HttpSamples
             // HttpClient HttpClient = new HttpClient(new WinHttpHandler());
             // AndroidHttpHandler | BrowserHttpHandler | NSUrlHttpHandler
 
-            { // get
-
+            {
+                // get
                 // http client
                 HttpClient httpClient = new HttpClient();
 
@@ -65,18 +83,11 @@ namespace HttpSamples
                     }
                 }
 
-                // refit
-                User user2 = (await RestService.For<IUsersService>("https://reqres.in/api").GetUserById(2)).User;
-            }
-
-            { // post
-
+                // post
                 // http client
-                HttpClient httpClient = new HttpClient();
-
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://reqres.in/api/users")
                 {
-                    Content = new StringContent(JsonConvert.SerializeObject(new { name = "morpheus", job = "leader" }), Encoding.UTF8, "text/json")
+                    Content = new StringContent(JsonConvert.SerializeObject(new { name = "morpheus", job = "leader" }), Encoding.UTF8, "application/json")
                 })
                 {
                     using (HttpResponseMessage response = await httpClient.SendAsync(request))
@@ -88,13 +99,23 @@ namespace HttpSamples
                             using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
                             {
                                 JToken json = await JToken.LoadAsync(jsonReader);
+                                Person person1 = json.ToObject<Person>();
                             }
                         }
                     }
                 }
 
                 // refit
-                var createdUser = await RestService.For<IUsersService>("https://reqres.in/api").CreateUser(new { name = "morpheus", job = "leader" });
+                // get
+                User user2 = (await RestService.For<IUsersService>("https://reqres.in/api").GetUserById(2)).User;
+
+                // refit
+                //post
+                var createdPerson = await RestService.For<IUsersService>("https://reqres.in/api").CreateUser(new { name = "morpheus", job = "leader" });
+                
+                // refit
+                //post by class
+                Person person2 = await RestService.For<IUsersService>("https://reqres.in/api").CreateUserByClass(new Person { Name = "morpheus", Job = "leader" });
             }
         }
     }
