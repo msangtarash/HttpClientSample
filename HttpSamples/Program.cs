@@ -30,6 +30,9 @@ namespace HttpSamples
     {
         [Get("/users/{userId}")]
         Task<UserData> GetUserById(int userId);
+
+        [Post("/users")]
+        Task<object> CreateUser(object user);
     }
 
     class Program
@@ -43,6 +46,7 @@ namespace HttpSamples
 
             { // get
 
+                // http client
                 HttpClient httpClient = new HttpClient();
 
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://reqres.in/api/users/2") { })
@@ -61,11 +65,13 @@ namespace HttpSamples
                     }
                 }
 
+                // refit
                 User user2 = (await RestService.For<IUsersService>("https://reqres.in/api").GetUserById(2)).User;
             }
 
             { // post
 
+                // http client
                 HttpClient httpClient = new HttpClient();
 
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://reqres.in/api/users")
@@ -86,6 +92,9 @@ namespace HttpSamples
                         }
                     }
                 }
+
+                // refit
+                var createdUser = await RestService.For<IUsersService>("https://reqres.in/api").CreateUser(new { name = "morpheus", job = "leader" });
             }
         }
     }
