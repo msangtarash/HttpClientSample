@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using Refit;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace HttpSamples
@@ -27,7 +28,7 @@ namespace HttpSamples
 
     public interface IUsersService
     {
-        [Get("/users/2")]
+        [Get("/users/{userId}")]
         Task<UserData> GetUserById(int userId);
     }
 
@@ -40,25 +41,52 @@ namespace HttpSamples
             // HttpClient HttpClient = new HttpClient(new WinHttpHandler());
             // AndroidHttpHandler | BrowserHttpHandler | NSUrlHttpHandler
 
-            HttpClient httpClient = new HttpClient();
+            { // get
 
-            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://reqres.in/api/users/2") { })
-            {
-                using (HttpResponseMessage response = await httpClient.SendAsync(request))
+                HttpClient httpClient = new HttpClient();
+
+                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://reqres.in/api/users/2") { })
                 {
-                    response.EnsureSuccessStatusCode();
-                    using (StreamReader streamReader = new StreamReader(await response.Content.ReadAsStreamAsync()))
+                    using (HttpResponseMessage response = await httpClient.SendAsync(request))
                     {
-                        using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
+                        response.EnsureSuccessStatusCode();
+                        using (StreamReader streamReader = new StreamReader(await response.Content.ReadAsStreamAsync()))
                         {
-                            JToken json = await JToken.LoadAsync(jsonReader);
-                            User user = json["data"].ToObject<User>();
+                            using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
+                            {
+                                JToken json = await JToken.LoadAsync(jsonReader);
+                                User user = json["data"].ToObject<User>();
+                            }
+                        }
+                    }
+                }
+
+                User user2 = (await RestService.For<IUsersService>("https://reqres.in/api").GetUserById(2)).User;
+            }
+
+            { // post
+
+                HttpClient httpClient = new HttpClient();
+
+                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://reqres.in/api/users")
+                {
+                    Content = new StringContent(JsonConvert.SerializeObject(new { name = "morpheus", job = "leader" }), Encoding.UTF8, "text/json")
+                })
+                {
+                    using (HttpResponseMessage response = await httpClient.SendAsync(request))
+                    {
+                        response.EnsureSuccessStatusCode();
+
+                        using (StreamReader streamReader = new StreamReader(await response.Content.ReadAsStreamAsync()))
+                        {
+                            using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
+                            {
+                                JToken json = await JToken.LoadAsync(jsonReader);
+                            }
                         }
                     }
                 }
             }
-
-            User user2 = (await RestService.For<IUsersService>("https://reqres.in/api").GetUserById(2)).User;
         }
     }
 }
