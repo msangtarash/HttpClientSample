@@ -1,0 +1,21 @@
+﻿Protocols =>
+	HttpClient  |				
+	SmtpClient  | ======>>>>> these and some other clients are a bridge between client and server for transforming data.
+	cpClient    |
+
+in order to use HttpClient there are some 
+
+Protocols =>
+	HTTP  | Hyper-Text Transfer Protocol	|				
+	SMTP  | Simple Main Transfer Protocol   | => these and some other Protocols are a bridge between client and server for sending request and getting responce.
+	TCP   | Transmission Control Protocol	|
+
+ASP.NET => HTTP Server for .NET
+
+HttpClient => Http client for .NET which accepts a handler: WinHttpHandler, HttpClientHandler, AndroidClientHandler, NSUrlHandler (iOS). The handler handles the works internally.
+
+Refit is a "library" which make http operations easier. It uses http client behind the scene but it has some limitations in compareson to HttpClient.
+
+rest Api => for http and https
+
+odata is a "library" which make http operations easier. It uses http client behind the scene.
